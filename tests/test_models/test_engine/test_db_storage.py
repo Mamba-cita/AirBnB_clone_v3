@@ -18,6 +18,7 @@ import json
 import os
 import pep8
 import unittest
+from models import storage
 DBStorage = db_storage.DBStorage
 classes = {"Amenity": Amenity, "City": City, "Place": Place,
            "Review": Review, "State": State, "User": User}
@@ -87,21 +88,23 @@ class TestFileStorage(unittest.TestCase):
     def test_save(self):
         """Test that save properly saves objects to file.json"""
 
+    def test_get_db(self):
+        """ Tests method for obtaining an instance db storage"""
+        dic = {"name": "Cundinamarca"}
+        instance = State(**dic)
+        storage.new(instance)
+        storage.save()
+        get_instance = storage.get(State, instance.id)
+        self.assertEqual(get_instance, instance)
 
-class TestDBStorage_new_methods(unittest.TestCase):
-    def test_get_method(self):
-        """Create a new State object and save it to the database"""
-        new_state = State(name="Test State")
-        new_state.save()
-        retrieved_state = storage.get(State, new_state.id)
-        self.assertIsNotNone(retrieved_state)
-        self.assertEqual(retrieved_state, new_state)
-
-    def test_count_method(self):
-        """Tests the count method"""
-        state_count = storage.count(State)
-        self.assertEqual(state_count, len(storage.all(State)))
-
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_count(self):
+        """ Tests count method db storage """
+        dic = {"name": "Vecindad"}
+        state = State(**dic)
+        storage.new(state)
+        dic = {"name": "Mexico", "state_id": state.id}
+        city = City(**dic)
+        storage.new(city)
+        storage.save()
+        c = storage.count()
+        self.assertEqual(len(storage.all()), c)
